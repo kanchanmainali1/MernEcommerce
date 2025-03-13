@@ -1,48 +1,79 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../../models/User');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../../models/User");
 
-//register
+// Register
 const registerUser = async (req, res) => {
-   const { username,email, password } = req.body;
-   try{
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-         username,email, password: hashedPassword 
-        });
-        await newUser.save();
-        res.status(201).json({
-            success:true,
-            message:'User created successfully'})
+  const { userName, email, password } = req.body;
 
-
-   }
-    catch(e){
-        res.status(500).json({
-            success:false,
-            message:e.message})
-        
-    };
-}
-
-
-// login
-const loginUser = async (req, res) => {
-    const { email, password } = req.body;
-    try{
-
+  try {
+    const checkUser = await User.findOne({ email });
+    if (checkUser) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already registered!",
+      });
     }
-    catch(e){
-        res.status(500).json({
-            success:false,
-            message:e.message})
-        
-    };
+
+    const hashPassword = await bcrypt.hash(password, 12);
+    const newUser = new User({
+      userName,
+      email,
+      password: hashPassword,
+    });
+
+    await newUser.save();
+    res.status(201).json({
+      success: true,
+      message: "Registration successful",
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Login 
+const loginUser = async (req, res) => {
+   const {email,password} =req.body;
+   try{
+      const checkUser=await User.findOne({email})
+      if(!checkUser)return res.json({
+         success: false,
+         message: "User doesn't exists! Please register first"
+      })
+      const checkPasswordMatch= await bcrypt.compare(password, checkUser.password)
+      if(!checkPasswordMatch) return res.json({
+         success:false,
+         message:"Incorrect Password! Please try again"
+      })
+      const token= jwt.sign({
+         id: checkUser._id, role: checkUser.role, email:checkUser.email
+      },'CLIENT_SECRET_KEY',{expiresIn:'60m'})
+      res.cookie('token',token,{httpOnly:true,secure:false}).json({
+         success: true,
+         message:"Logged in Successfully",
+         user:{
+            email: checkUser.email,
+            role: checkUser.role,
+            id: checkUser._id
+         }
+      })
+   }
+catch(e){
+   console.log(e)
+   res.status(500).json({
+      success:false,
+      message: "Some error occured"
+   })
 }
-// logout
-// auth middleware
+ 
+};
 
 module.exports = {
-    registerUser,
-    loginUser,
-};
+  registerUser,
+  loginUser,
+}; 
