@@ -28,7 +28,7 @@ function Register() {
           return 'Account created successfully! Please login';
         },
         error: (error) => {
-          if (typeof error === 'string' && error.includes('already registered')) {
+          if (error.includes("already registered")) {
             return 'Email is already registered!';
           }
           return error || 'Registration failed. Please try again';
