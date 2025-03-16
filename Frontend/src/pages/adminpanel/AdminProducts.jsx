@@ -1,9 +1,68 @@
-import React from 'react'
+import React, { Fragment, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import CommonForm from "@/components/common/CommonForm";
+
+// Initial form data matching your form controls
+const initialFormData = {
+  image: null,
+  title: "",
+  description: "",
+  category: "",
+  brand: "",
+  price: "",
+  salePrice: "",
+  totalStock: "",
+};
 
 function AdminProducts() {
-  return (
-    <div>AdminProducts</div>
-  )
-} 
+  const [openCreateProductsDialog, setOpenCreateProductsDialog] = useState(false);
+  const [formData, setFormData] = useState(initialFormData);
 
-export default AdminProducts
+  function onSubmit(e) {
+    e.preventDefault();
+   
+    console.log("Submitted data:", formData);
+
+    
+    setOpenCreateProductsDialog(false);
+  }
+
+  return (
+    <Fragment>
+      <div className="mb-5 flex justify-end w-full">
+        <Button onClick={() => setOpenCreateProductsDialog(true)}>
+          Add new Product
+        </Button>
+      </div>
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <Sheet
+          open={openCreateProductsDialog}
+          onOpenChange={() => setOpenCreateProductsDialog(false)}
+        >
+          <SheetContent side="right" className="overflow-auto">
+            <SheetHeader>
+              <SheetTitle>Add New Product</SheetTitle>
+            </SheetHeader>
+            <div className="py-6">
+              <CommonForm
+                onSubmit={onSubmit}
+                formData={formData}
+                setFormData={setFormData}
+                buttonText="Add"
+                formControls={addProductFormElements}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </Fragment>
+  );
+}
+
+export default AdminProducts;
