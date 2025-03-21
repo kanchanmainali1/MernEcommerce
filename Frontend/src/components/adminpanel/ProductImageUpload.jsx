@@ -18,8 +18,13 @@ function ProductImageUpload({
 }) {
   const inputRef = useRef(null);
 
+  console.log(isEditMode, "isEditMode");
+
   function handleImageFileChange(event) {
+    console.log(event.target.files, "event.target.files");
     const selectedFile = event.target.files?.[0];
+    console.log(selectedFile);
+
     if (selectedFile) setImageFile(selectedFile);
   }
 
@@ -41,38 +46,29 @@ function ProductImageUpload({
   }
 
   async function uploadImageToCloudinary() {
-    // Show loading state
     setImageLoadingState(true);
+    const data = new FormData();
+    data.append("my_file", imageFile);
+    const response = await axios.post(
+      "http://localhost:5000/api/admin/products/upload-image",
+      data
+    );
+    console.log(response, "response");
 
-    try {
-      const data = new FormData();
-      data.append("my_file", imageFile);
-
-      const response = await axios.post(
-        "http://localhost:5000/api/admin/products/image-upload",
-        data
-      );
-
-      if (response?.data?.success) {
-        setUploadedImageUrl(response.data.result.url);
-      }
-    } catch (error) {
-      console.error("Image upload error:", error);
-    } finally {
-      // Hide loading state
+    if (response?.data?.success) {
+      setUploadedImageUrl(response.data.result.url);
       setImageLoadingState(false);
     }
   }
 
-  // Whenever imageFile changes, start upload
   useEffect(() => {
-    if (imageFile) {
-      uploadImageToCloudinary();
-    }
+    if (imageFile !== null) uploadImageToCloudinary();
   }, [imageFile]);
 
   return (
-    <div className={`w-full mt-4 ${isCustomStyling ? "" : "max-w-md mx-auto"}`}>
+    <div
+      className={`w-full  mt-4 ${isCustomStyling ? "" : "max-w-md mx-auto"}`}
+    >
       <Label className="text-lg font-semibold mb-2 block">Upload Image</Label>
       <div
         onDragOver={handleDragOver}

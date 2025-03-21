@@ -1,15 +1,23 @@
+import React, { Fragment, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
+
 import ProductImageUpload from "@/components/adminpanel/ProductImageUpload";
 import CommonForm from "@/components/common/CommonForm";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { addProductFormElements } from "@/config";
-// Make sure you import *all* needed thunks, including deleteProduct
-import { addNewProduct, editProduct, fetchAllProducts, deleteProduct } from "@/store/admin/product-slice";
-import React, { Fragment, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-// If you're using a toast, make sure to import it from the correct place
-// import { toast } from "@/components/ui/use-toast"; // Example
 
+import { addProductFormElements } from "@/config";
+import {
+  addNewProduct,
+  editProduct,
+  fetchAllProducts,
+  deleteProduct,
+} from "@/store/admin/product-slice";
+
+import AdminProductTile from "@/components/adminpanel/AdminProductTile";
+
+// Initial form data
 const initialFormData = {
   image: null,
   title: "",
@@ -30,65 +38,88 @@ function AdminProducts() {
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
 
-  // Access the slice from state.adminProducts (store.js => adminProducts: adminProductsSlice)
   const { productList } = useSelector((state) => state.adminProducts);
   const dispatch = useDispatch();
 
-  // Handle form submission for Add/Edit
+  // Handle form submission for Add or Edit (using toast.promise)
   function onSubmit(event) {
     event.preventDefault();
 
     if (currentEditedId !== null) {
-      // Editing
-      dispatch(
-        editProduct({
-          id: currentEditedId,
-          formData, // pass entire object or destructure as needed
-        })
-      ).then((data) => {
-        if (data?.payload?.success) {
-          dispatch(fetchAllProducts());
-          setFormData(initialFormData);
-          setOpenCreateProductsDialog(false);
-          setCurrentEditedId(null);
+      // Editing an existing product
+     
+        dispatch(editProduct({ id: currentEditedId, formData })).unwrap(),
+        {
+          loading: "Updating product...",
+          success: (data) => {
+            if (data?.success) {
+              dispatch(fetchAllProducts());
+              setFormData(initialFormData);
+              setOpenCreateProductsDialog(false);
+              setCurrentEditedId(null);
+              return data?.message?.title || data?.message || "Product updated successfully";
+            }
+            return "Product update failed!";
+          },
+          error: (error) => {
+            if (typeof error === "string") {
+              return error;
+            } else if (error?.title) {
+              return error.title;
+            }
+            return "Failed to update product. Please try again.";
+          },
         }
-      });
+      
     } else {
-      // Adding
-      dispatch(
-        addNewProduct({
-          ...formData,
-          image: uploadedImageUrl,
-        })
-      ).then((data) => {
-        if (data?.payload?.success) {
-          dispatch(fetchAllProducts());
-          setOpenCreateProductsDialog(false);
-          setImageFile(null);
-          setFormData(initialFormData);
-          // toast({
-          //   title: "Product added successfully",
-          // });
+      // Adding a new product
+      toast.promise(
+        dispatch(
+          addNewProduct({
+            ...formData,
+            image: uploadedImageUrl, // Use the Cloudinary URL
+          })
+        ).unwrap(),
+        {
+          loading: "Adding product...",
+          success: (data) => {
+            if (data?.success) {
+              dispatch(fetchAllProducts());
+              setOpenCreateProductsDialog(false);
+              setImageFile(null);
+              setFormData(initialFormData);
+              return data?.message?.title || data?.message || "Product added successfully";
+            }
+            return "Product addition failed!";
+          },
+          error: (error) => {
+            if (typeof error === "string") {
+              return error;
+            } else if (error?.title) {
+              return error.title;
+            }
+            return "Failed to add product. Please try again.";
+          },
         }
-      });
+      );
     }
   }
 
   // Delete a product
-  function handleDelete(getCurrentProductId) {
-    dispatch(deleteProduct(getCurrentProductId)).then((data) => {
+  function handleDelete(productId) {
+    dispatch(deleteProduct(productId)).then((data) => {
       if (data?.payload?.success) {
         dispatch(fetchAllProducts());
       }
     });
   }
 
-  // Simple form validation
+  // Basic form validation ignoring averageReview
   function isFormValid() {
     return Object.keys(formData)
-      .filter((currentKey) => currentKey !== "averageReview")
+      .filter((key) => key !== "averageReview")
       .map((key) => formData[key] !== "")
-      .every((item) => item);
+      .every((filled) => filled);
   }
 
   // Fetch all products on mount
@@ -96,12 +127,21 @@ function AdminProducts() {
     dispatch(fetchAllProducts());
   }, [dispatch]);
 
-  console.log(formData, "formData");
+  console.log("Current Form Data:", formData);
 
   return (
     <Fragment>
       <div className="mb-5 w-full flex justify-end">
-        <Button onClick={() => setOpenCreateProductsDialog(true)}>
+        {/* This button resets the form for a new product */}
+        <Button
+          onClick={() => {
+            setOpenCreateProductsDialog(true);
+            setCurrentEditedId(null);
+            setFormData(initialFormData);
+            setImageFile(null);
+            setUploadedImageUrl("");
+          }}
+        >
           Add New Product
         </Button>
       </div>
@@ -109,14 +149,12 @@ function AdminProducts() {
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
         {productList && productList.length > 0
           ? productList.map((productItem) => (
-              // Example usage of a custom component
-              // Ensure this component is defined/imported correctly
               <AdminProductTile
                 key={productItem._id}
+                product={productItem}
                 setFormData={setFormData}
                 setOpenCreateProductsDialog={setOpenCreateProductsDialog}
                 setCurrentEditedId={setCurrentEditedId}
-                product={productItem}
                 handleDelete={handleDelete}
               />
             ))
@@ -129,6 +167,8 @@ function AdminProducts() {
           setOpenCreateProductsDialog(false);
           setCurrentEditedId(null);
           setFormData(initialFormData);
+          setImageFile(null);
+          setUploadedImageUrl("");
         }}
       >
         <SheetContent side="right" className="overflow-auto">
@@ -138,6 +178,7 @@ function AdminProducts() {
             </SheetTitle>
           </SheetHeader>
 
+          {/* Product Image Upload */}
           <ProductImageUpload
             imageFile={imageFile}
             setImageFile={setImageFile}
@@ -145,10 +186,10 @@ function AdminProducts() {
             setUploadedImageUrl={setUploadedImageUrl}
             setImageLoadingState={setImageLoadingState}
             imageLoadingState={imageLoadingState}
-            // If currentEditedId is not null, we assume it's in edit mode
             isEditMode={currentEditedId !== null}
           />
 
+          {/* Form for adding/editing product details */}
           <div className="py-6">
             <CommonForm
               onSubmit={onSubmit}

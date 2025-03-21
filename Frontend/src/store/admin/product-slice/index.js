@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios"; // 1) Make sure axios is imported
+import axios from "axios";
 
 const initialState = {
   isLoading: false,
@@ -19,7 +19,7 @@ export const addNewProduct = createAsyncThunk(
         },
       }
     );
-    return result?.data;
+    return result?.data; // result?.data might contain { success, data, message }
   }
 );
 
@@ -27,7 +27,6 @@ export const addNewProduct = createAsyncThunk(
 export const fetchAllProducts = createAsyncThunk(
   "adminProduct/fetchAllProducts",
   async () => {
-    // 2) Remove formData from GET request
     const result = await axios.get(
       "http://localhost:5000/api/admin/products/get",
       {
@@ -36,14 +35,13 @@ export const fetchAllProducts = createAsyncThunk(
         },
       }
     );
-    return result?.data;
+    return result?.data; // e.g. { success: true, data: [...] }
   }
 );
 
 // Edit a product
 export const editProduct = createAsyncThunk(
   "adminProduct/editProduct",
-  // 3) Destructure the payload to match how you're dispatching { id, formData }
   async ({ id, formData }) => {
     const result = await axios.put(
       `http://localhost:5000/api/admin/products/edit/${id}`,
@@ -81,14 +79,14 @@ const adminProductsSlice = createSlice({
       })
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        // If your backend returns { success: true, data: [ ... ] }, this will store the array
+        // If your backend returns { success: true, data: [ ... ] }, store that array
         state.productList = action.payload.data;
       })
       .addCase(fetchAllProducts.rejected, (state) => {
         state.isLoading = false;
         state.productList = [];
       });
-    // You can also add .addCase for addNewProduct, editProduct, deleteProduct as needed
+    // You could add .addCase for addNewProduct, editProduct, deleteProduct if needed
   },
 });
 
