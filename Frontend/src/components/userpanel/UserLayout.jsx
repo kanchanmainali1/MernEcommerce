@@ -15,7 +15,7 @@ function UserLayout() {
     <Outlet />
 
 </main>
-        UserLayout</div>
+        </div>
   )
 }
 
