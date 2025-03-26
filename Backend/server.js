@@ -3,6 +3,7 @@ const mongoose=require('mongoose');
 const cookieParser=require('cookie-parser');
 const authRoutes=require('./routes/auth/auth.route');
 const adminProductRoutes=require('./routes/admin/product.route');
+const userProductRoutes=require('./routes/users/product.route');
 const cors=require('cors');
 mongoose.connect(
 'mongodb+srv://mainalikanchan08:mainalikanchan2060@cluster0.o7whh.mongodb.net/'
@@ -28,6 +29,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use('/api/auth',authRoutes)
 app.use('/api/admin/products',adminProductRoutes) 
+app.use('/api/user/products',userProductRoutes)
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
 });
