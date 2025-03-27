@@ -5,12 +5,15 @@ import { Badge } from "../ui/badge";
 
 function UserProductTile({
   product,
-  handleGetProductDetails,
-  handleAddtoCart,
+  handleGetProductDetails = () => {},
+  handleAddtoCart = () => {},
 }) {
   return (
     <Card className="w-full max-w-sm mx-auto">
-      <div onClick={() => handleGetProductDetails(product?._id)}>
+      <div
+        onClick={() => handleGetProductDetails(product?._id)}
+        className="cursor-pointer"
+      >
         <div className="relative">
           <img
             src={product?.image}
@@ -47,27 +50,31 @@ function UserProductTile({
                 product?.salePrice > 0 ? "line-through" : ""
               } text-lg font-semibold text-primary`}
             >
-                Rs.{product?.price}
+              Rs.{product?.price}
             </span>
-            {product?.salePrice > 0 ? (
+            {product?.salePrice > 0 && (
               <span className="text-lg font-semibold text-primary">
                 Rs.{product?.salePrice}
               </span>
-            ) : null}
+            )}
           </div>
         </CardContent>
       </div>
+
       <CardFooter>
         {product?.totalStock === 0 ? (
-          <Button className="w-full opacity-60 cursor-not-allowed">
+          <Button className="w-full opacity-60 cursor-not-allowed" disabled>
             Out Of Stock
           </Button>
         ) : (
           <Button
-            onClick={() => handleAddtoCart(product?._id, product?.totalStock)}
+            onClick={(e) => {
+              e.stopPropagation(); // ✅ Prevent click from bubbling to parent
+              handleAddtoCart(product?._id, product?.totalStock);
+            }}
             className="w-full"
           >
-            Add to cart
+            Add to Cart
           </Button>
         )}
       </CardFooter>
