@@ -9,21 +9,22 @@ import { toast } from "sonner";
 import { Label } from "../ui/label";
 import { useEffect, useState } from "react";
 import { setProductDetails } from "@/store/user/product-slice";
+import { addToCart, fetchCartItems } from "@/store/user/cart-slice";
 
 function ProductDetailsDialog({ open, setOpen, productDetails }) {
   const [reviewMsg, setReviewMsg] = useState("");
   const [rating, setRating] = useState(0);
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  // const { cartItems } = useSelector((state) => state.shopCart);
-  // const { reviews } = useSelector((state) => state.shopReview);
+  // const { cartItems } = useSelector((state) => state.userCart);
+  // const { reviews } = useSelector((state) => state.userReview);
 
   function handleRatingChange(getRating) {
     setRating(getRating);
   }
 
   function handleAddToCart(getCurrentProductId, getTotalStock) {
-    let getCartItems = cartItems.items || [];
+    let getCartItems = fetchCartItems.items || [];
 
     if (getCartItems.length) {
       const indexOfCurrentItem = getCartItems.findIndex(

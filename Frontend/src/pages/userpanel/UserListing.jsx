@@ -1,40 +1,44 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import ProductFilter from '@/components/userpanel/ProductFilter';
-import { sortOptions } from '@/config';
-import { fetchAllFilteredProducts, fetchProductDetails } from '@/store/user/product-slice';
-import { ArrowUpDown } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import UserProductTile from '@/components/userpanel/UserProductTile';
-import { useSearchParams } from 'react-router-dom';
-import ProductDetailsDialog from '@/components/userpanel/ProductDetailsDialog';
-import { toast } from 'sonner';
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ProductFilter from "@/components/userpanel/ProductFilter";
+import { sortOptions } from "@/config";
+import {
+  fetchAllFilteredProducts,
+  fetchProductDetails,
+} from "@/store/user/product-slice";
+import { ArrowUpDown } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import UserProductTile from "@/components/userpanel/UserProductTile";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import ProductDetailsDialog from "@/components/userpanel/ProductDetailsDialog";
+import { toast } from "sonner";
+import { addToCart, fetchCartItems } from "@/store/user/cart-slice";
 
 function createSearchParamsHelper(filterParams) {
   const queryParams = [];
-
   for (const [key, value] of Object.entries(filterParams)) {
     if (Array.isArray(value) && value.length > 0) {
       const paramValue = value.join(",");
       queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
     }
   }
-
   return queryParams.join("&");
 }
 
 function UserListing() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { productList, productDetails } = useSelector((state) => state.userProducts);
+  const { user } = useSelector((state) => state.auth);
   const [filters, setFilters] = useState({});
-  const [sort, setSort] = useState(null);
+  const [sort, setSort] = useState("price-lowtohigh");
   const [searchParams, setSearchParams] = useSearchParams();
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
 
@@ -47,10 +51,7 @@ function UserListing() {
     const indexOfCurrentSection = Object.keys(cpyFilters).indexOf(getSectionId);
 
     if (indexOfCurrentSection === -1) {
-      cpyFilters = {
-        ...cpyFilters,
-        [getSectionId]: [getCurrentOptions],
-      };
+      cpyFilters = { ...cpyFilters, [getSectionId]: [getCurrentOptions] };
     } else {
       const indexOfCurrentOption = cpyFilters[getSectionId].indexOf(getCurrentOptions);
       if (indexOfCurrentOption === -1) {
@@ -65,36 +66,57 @@ function UserListing() {
   }
 
   function handleGetProductDetails(getCurrentProductId) {
-    toast.promise(
-      dispatch(fetchProductDetails(getCurrentProductId)).unwrap(),
-      {
-        loading: "Loading product details...",
-        success: () => {
-          setOpenDetailsDialog(true);
-          return "Product loaded successfully!";
-        },
-        error: "Failed to load product. Try again.",
+    toast.promise(dispatch(fetchProductDetails(getCurrentProductId)).unwrap(), {
+      loading: "Loading product details...",
+      success: () => {
+        setOpenDetailsDialog(true);
+        return "Product loaded successfully!";
+      },
+      error: "Failed to load product. Try again.",
+    });
+  }
+
+  function handleAddtoCart(getCurrentProductId, getTotalStock) {
+    dispatch(
+      addToCart({
+        userId: user?.id,
+        productId: getCurrentProductId,
+        quantity: 1,
+      })
+    ).then((data) => {
+      if (data?.payload?.success) {
+        dispatch(fetchCartItems(user?.id));
+        toast.success("Product added to cart");
       }
-    );
+    });
   }
 
   useEffect(() => {
-    setSort("price-lowtohigh");
-    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
-  }, []);
+    const filtersFromStorage = JSON.parse(sessionStorage.getItem("filters")) || {};
+    const categoryFromURL = searchParams.get("category");
 
-  useEffect(() => {
-    if (filters && Object.keys(filters).length > 0) {
-      const createQueryString = createSearchParamsHelper(filters);
-      setSearchParams(new URLSearchParams(createQueryString));
+    if (categoryFromURL) {
+      filtersFromStorage.category = [categoryFromURL];
     }
-  }, [filters]);
+
+    setFilters(filtersFromStorage);
+    const createQueryString = createSearchParamsHelper(filtersFromStorage);
+    setSearchParams(new URLSearchParams(createQueryString));
+  }, [searchParams]);
 
   useEffect(() => {
-    if (filters !== null && sort !== null) {
-      dispatch(fetchAllFilteredProducts({ filterParams: filters, sortParams: sort }));
+    if (filters && sort) {
+      dispatch(
+        fetchAllFilteredProducts({ filterParams: filters, sortParams: sort })
+      );
     }
   }, [dispatch, sort, filters]);
+
+  useEffect(() => {
+    if (productDetails !== null) {
+      setOpenDetailsDialog(true);
+    }
+  }, [productDetails]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
@@ -133,7 +155,7 @@ function UserListing() {
                 key={productItem._id}
                 product={productItem}
                 handleGetProductDetails={() => handleGetProductDetails(productItem._id)}
-                handleAddtoCart={() => {}}
+                handleAddtoCart={() => handleAddtoCart(productItem._id, productItem.totalStock)}
               />
             ))
           ) : (

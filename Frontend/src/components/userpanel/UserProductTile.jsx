@@ -69,7 +69,7 @@ function UserProductTile({
         ) : (
           <Button
             onClick={(e) => {
-              e.stopPropagation(); // ✅ Prevent click from bubbling to parent
+              e.stopPropagation(); // Prevent dialog open
               handleAddtoCart(product?._id, product?.totalStock);
             }}
             className="w-full"
