@@ -42,7 +42,7 @@ function UserCartWrapper({ cartItems, setOpenCartSheet }) {
         }}
         className="w-full mt-6"
       >
-        Checkout
+         Proceed to Checkout
       </Button>
     </SheetContent>
   );

@@ -1,6 +1,18 @@
-import { House, LogOut, Menu, ShoppingCart, User, UserRound } from "lucide-react";
+import {
+  House,
+  LogOut,
+  Menu,
+  ShoppingCart,
+  User,
+  UserRound,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
 import { Button } from "../ui/button";
 import { useDispatch, useSelector } from "react-redux";
@@ -60,29 +72,39 @@ function MenuItems() {
 }
 function HeaderRightContent() {
   const { user } = useSelector((state) => state.auth);
-  const{cartItems}=useSelector(state=>state.userCart)
+  const { cartItems } = useSelector((state) => state.userCart);
   const [openCartSheet, setOpenCartSheet] = useState(false);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  
   const handleLogout = () => {
-   dispatch(logoutUser());
-  }
+    dispatch(logoutUser());
+  };
 
-  useEffect(()=>{
-dispatch(fetchCartItems(user?.id))
-  }, [dispatch])
+  useEffect(() => {
+    dispatch(fetchCartItems(user?.id));
+  }, [dispatch]);
   return (
     <div className="flex lg:item-center lg:flex-row flex-col gap-4 ">
-      <Sheet open={openCartSheet} onOpenChange={()=>setOpenCartSheet(false)}>
-      <Button onClick={()=>setOpenCartSheet(true)} variant="outline" size="icon">
-        <ShoppingCart className="w-6 h-6" />
-        <span className="sr-only">User cart</span>
-      </Button>
-      <UserCartWrapper cartItems={cartItems &&cartItems.items && cartItems.items.length>0 ? cartItems.items:[]} />
+      <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
+        <Button
+          onClick={() => setOpenCartSheet(true)}
+          variant="outline"
+          size="icon"
+        >
+          <ShoppingCart className="w-6 h-6" />
+          <span className="sr-only">User cart</span>
+        </Button>
+        <UserCartWrapper
+        setOpenCartSheet={setOpenCartSheet}
+          cartItems={
+            cartItems && cartItems.items && cartItems.items.length > 0
+              ? cartItems.items
+              : []
+          }
+        />
       </Sheet>
-      
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Avatar className="bg-black">
@@ -95,7 +117,7 @@ dispatch(fetchCartItems(user?.id))
           <DropdownMenuLabel>Logged in as {user?.userName}</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem onClick={()=>navigate("/user/account")}>  
+          <DropdownMenuItem onClick={() => navigate("/user/account")}>
             <UserRound className="mr-2 h-4 w-4" />
             Account
           </DropdownMenuItem>
@@ -135,11 +157,10 @@ function UserHeader() {
         <div className="hidden lg:block">
           <MenuItems />
         </div>
-        
-          <div className="hidden lg:block">
-            <HeaderRightContent />
-          </div>
-       
+
+        <div className="hidden lg:block">
+          <HeaderRightContent />
+        </div>
       </div>
     </header>
   );

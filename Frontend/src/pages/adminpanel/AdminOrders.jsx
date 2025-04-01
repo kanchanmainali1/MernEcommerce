@@ -1,9 +1,11 @@
-import React from 'react'
+import AdminOrdersView from "@/components/adminpanel/AdminOrderView";
 
 function AdminOrders() {
   return (
-    <div>Admin</div>
-  )
+    <div>
+      <AdminOrdersView />
+    </div>
+  );
 }
 
-export default AdminOrders
+export default AdminOrders;
