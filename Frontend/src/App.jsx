@@ -19,6 +19,7 @@ import AuthLayout from "./components/auth/AuthLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./store/auth-slice";
 import { Skeleton } from "@/components/ui/skeleton"
+import SearchProducts from "./pages/userpanel/SearchProducts";
 
 
 function App() {
@@ -70,6 +71,7 @@ function App() {
           <Route path="listing" element={<UserListing />} />
           <Route path="checkout" element={<UserCheckout />} />
           <Route path="account" element={<UserAccount />} />
+          <Route path="search" element={<SearchProducts />} />
         </Route>
         <Route path="/unauth-page" element={<UnauthPage/>} />
         <Route path="*" element={<NotFound />} />
