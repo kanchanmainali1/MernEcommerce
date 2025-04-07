@@ -31,11 +31,9 @@ function CommonForm({
             type={controlItem.type}
             value={value}
             onChange={(event) =>
-              setFormData({
-                ...formData,
-                [controlItem.name]: event.target.value,
-              })
+              setFormData({ ...formData, [controlItem.name]: event.target.value })
             }
+            className="block w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
           />
         );
 
@@ -43,14 +41,11 @@ function CommonForm({
         return (
           <Select
             onValueChange={(val) =>
-              setFormData({
-                ...formData,
-                [controlItem.name]: val,
-              })
+              setFormData({ ...formData, [controlItem.name]: val })
             }
             value={value}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
               <SelectValue placeholder={controlItem.label} />
             </SelectTrigger>
             <SelectContent>
@@ -68,19 +63,16 @@ function CommonForm({
           <Textarea
             name={controlItem.name}
             placeholder={controlItem.placeholder}
-            id={controlItem.id}
+            id={controlItem.name}
             value={value}
             onChange={(event) =>
-              setFormData({
-                ...formData,
-                [controlItem.name]: event.target.value,
-              })
+              setFormData({ ...formData, [controlItem.name]: event.target.value })
             }
+            className="block w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
           />
         );
 
       default:
-        // Default to an input if componentType is not recognized
         return (
           <Input
             name={controlItem.name}
@@ -89,27 +81,31 @@ function CommonForm({
             type={controlItem.type}
             value={value}
             onChange={(event) =>
-              setFormData({
-                ...formData,
-                [controlItem.name]: event.target.value,
-              })
+              setFormData({ ...formData, [controlItem.name]: event.target.value })
             }
+            className="block w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
           />
         );
     }
   }
 
   return (
-    <form onSubmit={onSubmit}>
-      <div className="flex flex-col gap-3">
+    <form onSubmit={onSubmit} className="space-y-6">
+      <div className="space-y-4">
         {formControls.map((controlItem) => (
           <div className="grid w-full gap-1.5" key={controlItem.name}>
-            <Label className="mb-1">{controlItem.label}</Label>
+            <Label className="text-sm font-medium text-gray-700">
+              {controlItem.label}
+            </Label>
             {renderInputsByComponentType(controlItem)}
           </div>
         ))}
       </div>
-      <Button disabled={isBtnDisabled} type="submit" className="mt-2 w-full">
+      <Button
+        disabled={isBtnDisabled}
+        type="submit"
+        className="w-full py-3 mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition-colors"
+      >
         {buttonText || "Submit"}
       </Button>
     </form>

@@ -61,7 +61,7 @@ function MenuItems() {
       {userViewHeaderMenuItems.map((menuItem) => (
         <Label
           onClick={() => handleNavigate(menuItem)}
-          className="text-sm font-medium cursor-pointer"
+          className="text-sm font-medium cursor-pointer text-gray-700 hover:text-blue-600 transition-all"
           key={menuItem.id}
         >
           {menuItem.label}
@@ -70,6 +70,7 @@ function MenuItems() {
     </nav>
   );
 }
+
 function HeaderRightContent() {
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.userCart);
@@ -84,83 +85,81 @@ function HeaderRightContent() {
   useEffect(() => {
     dispatch(fetchCartItems(user?.id));
   }, [dispatch]);
+
   return (
-    <div className="flex lg:item-center lg:flex-row flex-col gap-4 ">
+    <div className="flex lg:items-center lg:flex-row flex-col gap-4">
       <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
         <Button
           onClick={() => setOpenCartSheet(true)}
-          variant="outline"
+          variant="ghost"
           size="icon"
+          className="relative shadow-sm hover:shadow-md"
         >
           <ShoppingCart className="w-6 h-6" />
-          <span className="sr-only">User cart</span>
+          {cartItems?.items?.length > 0 && (
+            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">{cartItems.items.length}</div>
+          )}
         </Button>
         <UserCartWrapper
-        setOpenCartSheet={setOpenCartSheet}
-          cartItems={
-            cartItems && cartItems.items && cartItems.items.length > 0
-              ? cartItems.items
-              : []
-          }
+          setOpenCartSheet={setOpenCartSheet}
+          cartItems={cartItems?.items || []}
         />
       </Sheet>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Avatar className="bg-black">
-            <AvatarFallback className="bg-black text-white font-extrabold ">
+          <Avatar className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-sm cursor-pointer">
+            <AvatarFallback className="bg-blue-600 text-white font-bold">
               {user?.userName[0].toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
-        <DropdownMenuContent side="right" className="w-56">
-          <DropdownMenuLabel>Logged in as {user?.userName}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-
-          <DropdownMenuItem onClick={() => navigate("/user/account")}>
-            <UserRound className="mr-2 h-4 w-4" />
-            Account
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
-            <LogOut className="mr-2 h-2 w-4" />
-            Logout
-          </DropdownMenuItem>
+        <DropdownMenuContent side="right" align="end" className="w-64 bg-white shadow-xl rounded-lg p-6">
+          <div className="flex flex-col items-center space-y-4">
+            <Avatar className="bg-gradient-to-r from-pink-500 to-purple-500 h-14 w-14 shadow-lg">
+              <AvatarFallback className="text-white font-bold text-xl">
+                {user?.userName[0].toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-center">
+              <p className="text-xl font-bold text-gray-800">{user?.userName}</p>
+              <p className="text-sm text-gray-500">{user?.email}</p>
+            </div>
+            <div className="w-full flex flex-col space-y-2">
+              <Button variant="outline" className="w-full py-2" onClick={() => navigate('/user/account')}>Account</Button>
+              <Button variant="destructive" className="w-full py-2" onClick={handleLogout}>Logout</Button>
+            </div>
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );
 }
-
 function UserHeader() {
-  const { isAuthenticated } = useSelector((state) => state.auth);
-
   return (
-    <header className="sticky top-0 z-40 bg-background shadow-md border-b">
+    <header className="sticky top-0 z-40 bg-white shadow-md border-b">
       <div className="flex items-center justify-between px-4 h-16 md:px-6">
-        <Link className="flex items-center gap-2" to="/user/home">
+        <Link className="flex items-center gap-2 text-blue-600" to="/user/home">
           <House className="h-6 w-6" />
-          <span className="font-bold">Buyfinity</span>
+          <span className="font-bold text-2xl tracking-tight">Buyfinity</span>
         </Link>
+        <div className="hidden lg:block">
+          <MenuItems />
+        </div>
+        <div className="hidden lg:block">
+          <HeaderRightContent />
+        </div>
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="lg:hidden">
               <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle header menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-full max-w-xs">
+          <SheetContent side="left" className="w-full max-w-xs bg-white">
             <MenuItems />
             <HeaderRightContent />
           </SheetContent>
         </Sheet>
-        <div className="hidden lg:block">
-          <MenuItems />
-        </div>
-
-        <div className="hidden lg:block">
-          <HeaderRightContent />
-        </div>
       </div>
     </header>
   );

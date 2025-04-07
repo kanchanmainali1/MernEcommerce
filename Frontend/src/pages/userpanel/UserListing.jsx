@@ -129,22 +129,45 @@ function UserListing() {
               {productList?.length || 0} Products
             </span>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <ArrowUpDown className="h-4 w-4" />
-                  <span>Sort by</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px]">
-                <DropdownMenuRadioGroup value={sort} onValueChange={handleSort}>
-                  {sortOptions.map((sortItem) => (
-                    <DropdownMenuRadioItem value={sortItem.id} key={sortItem.id}>
-                      {sortItem.label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button 
+      variant="outline" 
+      size="sm" 
+      className="flex items-center gap-2 bg-background hover:bg-accent/20 text-foreground px-4 py-2 rounded-lg transition-all shadow-sm"
+    >
+      <ArrowUpDown className="h-4 w-4" />
+      <span className="font-medium">Sort by</span>
+    </Button>
+  </DropdownMenuTrigger>
+  
+  <DropdownMenuContent 
+    align="end" 
+    className="w-[240px] rounded-lg shadow-xl bg-popover mt-2 border-0" // Added border-0 here
+    sideOffset={6}
+  >
+    <DropdownMenuRadioGroup value={sort} onValueChange={handleSort}>
+      {sortOptions.map((sortItem) => (
+        <DropdownMenuRadioItem 
+          value={sortItem.id} 
+          key={sortItem.id}
+          className="px-5 py-2.5 text-sm cursor-pointer transition-colors 
+            hover:bg-accent/30 focus:bg-accent/40
+            data-[state=checked]:bg-primary/10 data-[state=checked]:text-primary 
+            data-[state=checked]:font-medium group border-0" // Added border-0 here
+        >
+          <div className="flex items-center justify-between w-full">
+            <span>{sortItem.label}</span>
+            <span className="ml-auto pl-4">
+              <span className="h-2 w-2 rounded-full bg-primary opacity-0 
+                group-data-[state=checked]:opacity-100 transition-opacity
+                inline-block shadow-sm" />
+            </span>
+          </div>
+        </DropdownMenuRadioItem>
+      ))}
+    </DropdownMenuRadioGroup>
+  </DropdownMenuContent>
+</DropdownMenu>
           </div>
         </div>
 

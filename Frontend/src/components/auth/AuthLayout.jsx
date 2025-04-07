@@ -1,18 +1,16 @@
-
 import { Outlet } from "react-router-dom";
 
 function AuthLayout() {
-  
   return (
-    <div className="flex min-h-screen w-full">
-      <div className="hidden lg:flex items-center justify-center bg-black w-1/2 px-12">
-        <div className="max-w-md space-y-6 text-center text-primary-foreground">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white">
-            Welcome to Buyfinity!
-          </h1>
-        </div>
-      </div>
-      <div className="flex flex-1 items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+    <div
+      className="relative flex items-center justify-center min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/pic7.jpg')" }} // Update with your desired image path
+    >
+      {/* Color overlay for blending */}
+      <div className="absolute inset-0 bg-gradient-to-b from-pink-500 to-purple-700 opacity-50"></div>
+
+      {/* Centered card for the auth forms */}
+      <div className="relative z-10 w-full max-w-md p-8 bg-white rounded-lg shadow-xl">
         <Outlet />
       </div>
     </div>

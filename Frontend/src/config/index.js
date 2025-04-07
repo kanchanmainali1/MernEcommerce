@@ -139,11 +139,7 @@ export const userViewHeaderMenuItems = [
     label: "Accessories",
     path: "/user/listing",
   },
-  {
-    id: "search",
-    label: "Search",
-    path: "/user/search",
-  },
+  
 ];
 export const filterOptions = {
   category: [

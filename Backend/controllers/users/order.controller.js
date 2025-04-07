@@ -38,9 +38,10 @@ const createOrder = async (req, res) => {
 
     if (paymentMethod === "esewa") {
       const transactionUUID = `${newlyCreatedOrder._id}`;
-      const productCode = "EPAYTEST";
+      const merchantCode = esewaConfig.merchantCode; // e.g., "EPAYTEST"
 
-      const message = `total_amount=${totalAmount},transaction_uuid=${transactionUUID},product_code=${productCode}`;
+      // Generate the signature message using the new field names
+      const message = `amt=${totalAmount},txnId=${transactionUUID},merchantCode=${merchantCode}`;
       const signature = CryptoJS.HmacSHA256(message, esewaConfig.secretKey);
       const hashInBase64 = CryptoJS.enc.Base64.stringify(signature);
 
@@ -48,14 +49,15 @@ const createOrder = async (req, res) => {
 
       res.status(201).json({
         success: true,
-        paymentUrl,
         data: {
-          totalAmount,
-          transactionUUID,
-          productCode,
+          paymentUrl,
+          amt: totalAmount,            // renamed field
+          txnId: transactionUUID,        // renamed field
+          merchantCode,                // renamed field
           successUrl: esewaConfig.successUrl,
           failureUrl: esewaConfig.failureUrl,
           signature: hashInBase64,
+          signed_field_names: "amt,txnId,merchantCode",
         },
         orderId: newlyCreatedOrder._id,
       });

@@ -107,64 +107,66 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="grid grid-cols-2 gap-8 sm:p-12 max-w-[90vw] sm:max-w-[80vw] lg:max-w-[70vw]">
+      <DialogContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 max-w-[90vw] sm:max-w-[80vw] lg:max-w-[70vw] bg-white rounded-xl shadow-2xl">
         <div className="relative overflow-hidden rounded-lg">
           <img
             src={productDetails?.image}
             alt={productDetails?.title}
             width={600}
             height={600}
-            className="aspect-square w-full object-cover"
+            className="w-full h-auto object-cover rounded-lg"
           />
         </div>
-        <div>
+        <div className="flex flex-col justify-between">
           <div>
-            <h1 className="text-3xl font-extrabold">{productDetails?.title}</h1>
-            <p className="text-muted-foreground text-2xl mb-5 mt-4">
+            <h1 className="text-3xl font-extrabold text-gray-800">{productDetails?.title}</h1>
+            <p className="text-gray-600 text-lg mt-4">
               {productDetails?.description}
             </p>
           </div>
-          <div className="flex items-center justify-between">
-            <p
-              className={`text-3xl font-bold text-primary ${
-                productDetails?.salePrice > 0 ? "line-through" : ""
-              }`}
-            >
-              Rs.{productDetails?.price}
-            </p>
-            {productDetails?.salePrice > 0 && (
-              <p className="text-2xl font-bold text-muted-foreground">
-                Rs.{productDetails?.salePrice}
+          <div className="mt-6">
+            <div className="flex items-center justify-between">
+              <p className={`text-3xl font-bold text-primary ${productDetails?.salePrice > 0 ? "line-through text-gray-500" : ""}`}>
+                Rs.{productDetails?.price}
               </p>
-            )}
-          </div>
-          {/* <div className="flex items-center gap-2 mt-2">
-            <div className="flex items-center gap-0.5">
-              <StarRatingComponent rating={averageReview} />
+              {productDetails?.salePrice > 0 && (
+                <p className="text-2xl font-bold text-gray-700">
+                  Rs.{productDetails?.salePrice}
+                </p>
+              )}
             </div>
-            <span className="text-muted-foreground">
-              ({averageReview.toFixed(2)})
-            </span>
-          </div> */}
-          <div className="mt-5 mb-5">
-            {productDetails?.totalStock === 0 ? (
-              <Button className="w-full opacity-60 cursor-not-allowed" disabled>
-                Out of Stock
-              </Button>
-            ) : (
-              <Button
-                className="w-full"
-                onClick={() =>
-                  handleAddToCart(productDetails?._id, productDetails?.totalStock)
-                }
-              >
-                Add to Cart
-              </Button>
-            )}
+            {/* <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-0.5">
+                <StarIcon className="w-5 h-5 text-yellow-500" />
+                <StarIcon className="w-5 h-5 text-yellow-500" />
+                <StarIcon className="w-5 h-5 text-yellow-500" />
+                <StarIcon className="w-5 h-5 text-yellow-500" />
+                <StarIcon className="w-5 h-5 text-yellow-500" />
+              </div>
+              <span className="text-muted-foreground">
+                ({averageReview.toFixed(2)})
+              </span>
+            </div> */}
+            <div className="mt-6">
+              {productDetails?.totalStock === 0 ? (
+                <Button className="w-full opacity-60 cursor-not-allowed" disabled>
+                  Out of Stock
+                </Button>
+              ) : (
+                <Button
+                  className="w-full bg-blue-600 hover:bg-blue-700 transition-colors duration-300"
+                  onClick={() =>
+                    handleAddToCart(productDetails?._id, productDetails?.totalStock)
+                  }
+                >
+                  Add to Cart
+                </Button>
+              )}
+            </div>
           </div>
-          <Separator />
-          <div className="max-h-[300px] overflow-auto">
-            <h2 className="text-xl font-bold mb-4">Reviews</h2>
+          <Separator className="my-6" />
+          <div className="max-h-48 overflow-auto">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Reviews</h2>
             {/* <div className="grid gap-6">
               {reviews && reviews.length > 0 ? (
                 reviews.map((reviewItem, idx) => (
@@ -179,16 +181,18 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                         <h3 className="font-bold">{reviewItem?.userName}</h3>
                       </div>
                       <div className="flex items-center gap-0.5">
-                        <StarRatingComponent rating={reviewItem?.reviewValue} />
+                        <StarIcon className="w-4 h-4 text-yellow-500" />
+                        <StarIcon className="w-4 h-4 text-yellow-500" />
+                        <StarIcon className="w-4 h-4 text-yellow-500" />
+                        <StarIcon className="w-4 h-4 text-yellow-500" />
+                        <StarIcon className="w-4 h-4 text-yellow-500" />
                       </div>
-                      <p className="text-muted-foreground">
-                        {reviewItem.reviewMessage}
-                      </p>
+                      <p className="text-gray-600">{reviewItem.reviewMessage}</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <h1>No Reviews</h1>
+                <h1 className="text-gray-500">No Reviews</h1>
               )}
             </div> */}
 
