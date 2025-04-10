@@ -10,7 +10,7 @@ const initialState = {
   error: null,
 };
 
-// Creating a New Order (Using COD, no external payment integration)
+// Creating a new order (Using COD)
 export const createNewOrder = createAsyncThunk(
   "/order/createNewOrder",
   async (orderData) => {
@@ -22,6 +22,7 @@ export const createNewOrder = createAsyncThunk(
   }
 );
 
+// Fetch orders by user ID
 export const getAllOrdersByUserId = createAsyncThunk(
   "/order/getAllOrdersByUserId",
   async (userId) => {
@@ -32,6 +33,7 @@ export const getAllOrdersByUserId = createAsyncThunk(
   }
 );
 
+// Fetch order details by order ID
 export const getOrderDetails = createAsyncThunk(
   "/order/getOrderDetails",
   async (id) => {
@@ -64,7 +66,10 @@ const UserOrderSlice = createSlice({
         state.isLoading = false;
         state.approvalURL = null;
         state.orderId = action.payload.orderId;
-        sessionStorage.setItem("currentOrderId", JSON.stringify(action.payload.orderId));
+        sessionStorage.setItem(
+          "currentOrderId",
+          JSON.stringify(action.payload.orderId)
+        );
       })
       .addCase(createNewOrder.rejected, (state, action) => {
         state.isLoading = false;

@@ -1,11 +1,12 @@
 const express = require("express");
-const { createOrder, verifyEsewaPayment } = require("../../controllers/users/order.controller");
+const { createOrder, getOrdersByUserId, getOrderDetailsForUser } = require("../../controllers/users/order.controller");
 const router = express.Router();
 
-// Endpoint for creating a new order (with Esewa integration)
+
 router.post("/create", createOrder);
 
-// Endpoint for verifying Esewa payment
-router.post("/verify", verifyEsewaPayment);
+router.get("/list/:userId", getOrdersByUserId);
+
+router.get("/details/:id", getOrderDetailsForUser);
 
 module.exports = router;

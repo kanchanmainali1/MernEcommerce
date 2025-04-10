@@ -1,11 +1,6 @@
 const Order = require("../../models/Order");
-const Cart = require("../../models/Cart");
-const Product = require("../../models/Product");
-const axios = require("axios");
-const esewaConfig = require("../../helpers/esewa");
-const CryptoJS = require("crypto-js");
 
-
+// Create order (COD only)
 const createOrder = async (req, res) => {
   try {
     const {
@@ -36,67 +31,62 @@ const createOrder = async (req, res) => {
 
     await newlyCreatedOrder.save();
 
-    if (paymentMethod === "esewa") {
-      const transactionUUID = `${newlyCreatedOrder._id}`;
-      const merchantCode = esewaConfig.merchantCode; // e.g., "EPAYTEST"
-
-      // Generate the signature message using the new field names
-      const message = `amt=${totalAmount},txnId=${transactionUUID},merchantCode=${merchantCode}`;
-      const signature = CryptoJS.HmacSHA256(message, esewaConfig.secretKey);
-      const hashInBase64 = CryptoJS.enc.Base64.stringify(signature);
-
-      const paymentUrl = esewaConfig.esewaEndpoint;
-
-      res.status(201).json({
-        success: true,
-        data: {
-          paymentUrl,
-          amt: totalAmount,            // renamed field
-          txnId: transactionUUID,        // renamed field
-          merchantCode,                // renamed field
-          successUrl: esewaConfig.successUrl,
-          failureUrl: esewaConfig.failureUrl,
-          signature: hashInBase64,
-          signed_field_names: "amt,txnId,merchantCode",
-        },
-        orderId: newlyCreatedOrder._id,
-      });
-    } else {
-      res.status(201).json({
-        success: true,
-        message: "Order created successfully",
-        orderId: newlyCreatedOrder._id,
-      });
-    }
+    res.status(201).json({
+      success: true,
+      message: "Order created successfully with Cash on Delivery",
+      orderId: newlyCreatedOrder._id,
+    });
   } catch (error) {
     console.error("Error creating order:", error.message);
-    res.status(500).json({ success: false, message: "Some error occurred!" });
+    res
+      .status(500)
+      .json({ success: false, message: "Some error occurred!" });
   }
 };
 
-// Verify eSewa Payment
-const verifyEsewaPayment = async (req, res) => {
-  const { product_code, transaction_uuid, total_amount } = req.body;
-
+// Get all orders for a given user (by userId)
+// Instead of sending a 404 when there are no orders, we return an empty array.
+const getOrdersByUserId = async (req, res) => {
   try {
-    const verificationUrl = `${esewaConfig.verifyEndpoint}?product_code=${product_code}&total_amount=${total_amount}&transaction_uuid=${transaction_uuid}`;
-
-    const response = await axios.get(verificationUrl);
-
-    console.log("[eSewa] Verification Response:", response.data);
-
-    if (response.data.status === "COMPLETE") {
-      res.json({ success: true, message: "Payment verified successfully.", response: response.data });
-    } else {
-      res.json({ success: false, message: "Payment verification failed." });
-    }
+    const { userId } = req.params; // userId from the URL
+    const orders = await Order.find({ userId });
+    res.status(200).json({
+      success: true,
+      data: orders, // may be an empty array if no orders exist
+    });
   } catch (error) {
-    console.error("Error verifying payment:", error.message);
-    res.status(500).json({ success: false, message: "Verification error.", error: error.message });
+    console.error("Error fetching user orders:", error.message);
+    res
+      .status(500)
+      .json({ success: false, message: "Some error occurred!" });
+  }
+};
+
+// Get details of a single order by order id
+const getOrderDetailsForUser = async (req, res) => {
+  try {
+    const { id } = req.params; // order id from the URL
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found!",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    console.error("Error fetching order details:", error.message);
+    res
+      .status(500)
+      .json({ success: false, message: "Some error occurred!" });
   }
 };
 
 module.exports = {
   createOrder,
-  verifyEsewaPayment,
+  getOrdersByUserId,
+  getOrderDetailsForUser,
 };
