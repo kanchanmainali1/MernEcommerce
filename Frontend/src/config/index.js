@@ -67,19 +67,8 @@ export const addProductFormElements = [
       { id: "accessories", label: "Accessories" },
       { id: "footwear", label: "Footwear" },
     ],
-  },
-  {
-    label: "Brand",
-    name: "brand",
-    componentType: "select",
-    options: [
-      { id: "nike", label: "Nike" },
-      { id: "adidas", label: "Adidas" },
-      { id: "puma", label: "Puma" },
-      { id: "levi", label: "Levi's" },
-      { id: "zara", label: "Zara" },
-      { id: "h&m", label: "H&M" },
-    ],
+    
+  
   },
   {
     label: "Price",
@@ -103,6 +92,8 @@ export const addProductFormElements = [
     placeholder: "Enter total stock",
   },
 ];
+
+
 export const userViewHeaderMenuItems = [
   {
     id: "home",

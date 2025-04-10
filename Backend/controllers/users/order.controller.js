@@ -5,7 +5,7 @@ const axios = require("axios");
 const esewaConfig = require("../../helpers/esewa");
 const CryptoJS = require("crypto-js");
 
-// Create Order & Generate eSewa Payment URL
+
 const createOrder = async (req, res) => {
   try {
     const {

@@ -8,6 +8,7 @@ const userCartRoutes=require('./routes/users/cart.route');
 const userAddressRoutes=require('./routes/users/address.route');
 const userOrderRoutes=require('./routes/users/order.route');
 const usersearchRoutes=require('./routes/users/search.route');
+const commonFeatureRoutes=require('./routes/common/feature.route');
 const cors=require('cors');
 mongoose.connect(
 'mongodb+srv://mainalikanchan08:mainalikanchan2060@cluster0.o7whh.mongodb.net/'
@@ -38,6 +39,7 @@ app.use('/api/user/cart',userCartRoutes)
 app.use( '/api/user/address',userAddressRoutes)
 app.use("/api/user/order", userOrderRoutes);
 app.use("/api/user/search", usersearchRoutes);
+app.use("/api/common/feature", commonFeatureRoutes);
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
 });

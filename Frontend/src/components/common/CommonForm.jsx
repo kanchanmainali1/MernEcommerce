@@ -1,3 +1,4 @@
+import React from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import {
@@ -9,6 +10,8 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
+// Removed the ChevronDown import since it’s no longer used
+// import { ChevronDown } from "lucide-react";
 
 function CommonForm({
   formControls,
@@ -33,7 +36,7 @@ function CommonForm({
             onChange={(event) =>
               setFormData({ ...formData, [controlItem.name]: event.target.value })
             }
-            className="block w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
+            className="block w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-gray-800 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 transition-all shadow-sm"
           />
         );
 
@@ -45,10 +48,15 @@ function CommonForm({
             }
             value={value}
           >
-            <SelectTrigger className="w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
-              <SelectValue placeholder={controlItem.label} />
+            <SelectTrigger
+              className={`relative w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 transition-all shadow-sm ${
+                controlItem.className || ""
+              }`}
+            >
+              {/* Extra right padding keeps the text clear even if an arrow is rendered */}
+              <SelectValue placeholder={controlItem.label} className="pr-8" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-md border border-gray-300 bg-white shadow-lg z-50">
               {controlItem.options?.map((optionItem) => (
                 <SelectItem key={optionItem.id} value={optionItem.id}>
                   {optionItem.label}
@@ -68,7 +76,7 @@ function CommonForm({
             onChange={(event) =>
               setFormData({ ...formData, [controlItem.name]: event.target.value })
             }
-            className="block w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
+            className="block w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-gray-800 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 transition-all shadow-sm"
           />
         );
 
@@ -83,17 +91,17 @@ function CommonForm({
             onChange={(event) =>
               setFormData({ ...formData, [controlItem.name]: event.target.value })
             }
-            className="block w-full rounded-md border border-gray-200 bg-gray-50 p-3 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
+            className="block w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-gray-800 placeholder-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 transition-all shadow-sm"
           />
         );
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className="space-y-6 p-8 bg-white shadow-md rounded-lg">
       <div className="space-y-4">
         {formControls.map((controlItem) => (
-          <div className="grid w-full gap-1.5" key={controlItem.name}>
+          <div className="grid w-full gap-2" key={controlItem.name}>
             <Label className="text-sm font-medium text-gray-700">
               {controlItem.label}
             </Label>
@@ -104,7 +112,7 @@ function CommonForm({
       <Button
         disabled={isBtnDisabled}
         type="submit"
-        className="w-full py-3 mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition-colors"
+        className="w-full py-3 mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-all"
       >
         {buttonText || "Submit"}
       </Button>

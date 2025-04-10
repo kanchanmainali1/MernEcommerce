@@ -17,13 +17,12 @@ import {
 
 import AdminProductTile from "@/components/adminpanel/AdminProductTile";
 
-// Initial form data
+// Initial form data with "brand" removed
 const initialFormData = {
   image: null,
   title: "",
   description: "",
   category: "",
-  brand: "",
   price: "",
   salePrice: "",
   totalStock: "",
@@ -41,13 +40,13 @@ function AdminProducts() {
   const { productList } = useSelector((state) => state.adminProducts);
   const dispatch = useDispatch();
 
-  // Handle form submission for Add or Edit (using toast.promise)
+  // Handle form submission for adding or editing a product
   function onSubmit(event) {
     event.preventDefault();
 
     if (currentEditedId !== null) {
       // Editing an existing product
-     
+      toast.promise(
         dispatch(editProduct({ id: currentEditedId, formData })).unwrap(),
         {
           loading: "Updating product...",
@@ -70,7 +69,7 @@ function AdminProducts() {
             return "Failed to update product. Please try again.";
           },
         }
-      
+      );
     } else {
       // Adding a new product
       toast.promise(
@@ -118,37 +117,38 @@ function AdminProducts() {
   function isFormValid() {
     return Object.keys(formData)
       .filter((key) => key !== "averageReview")
-      .map((key) => formData[key] !== "")
-      .every((filled) => filled);
+      .every((key) => formData[key] !== "");
   }
 
-  // Fetch all products on mount
+  // Fetch products on mount
   useEffect(() => {
     dispatch(fetchAllProducts());
   }, [dispatch]);
 
-  console.log("Current Form Data:", formData);
-
   return (
     <Fragment>
-      <div className="mb-5 w-full flex justify-end">
-        {/* This button resets the form for a new product */}
-        <Button
-          onClick={() => {
-            setOpenCreateProductsDialog(true);
-            setCurrentEditedId(null);
-            setFormData(initialFormData);
-            setImageFile(null);
-            setUploadedImageUrl("");
-          }}
-        >
-          Add New Product
-        </Button>
-      </div>
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Product Management</h1>
+          <Button
+            onClick={() => {
+              setOpenCreateProductsDialog(true);
+              setCurrentEditedId(null);
+              setFormData(initialFormData);
+              setImageFile(null);
+              setUploadedImageUrl("");
+            }}
+            className="mt-4 sm:mt-0 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+          >
+            Add New Product
+          </Button>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {productList && productList.length > 0
-          ? productList.map((productItem) => (
+        {/* Product Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {productList && productList.length > 0 ? (
+            productList.map((productItem) => (
               <AdminProductTile
                 key={productItem._id}
                 product={productItem}
@@ -158,9 +158,13 @@ function AdminProducts() {
                 handleDelete={handleDelete}
               />
             ))
-          : null}
+          ) : (
+            <p className="col-span-full text-center text-gray-500">No products available</p>
+          )}
+        </div>
       </div>
 
+      {/* Modal Sheet for Add/Edit Product */}
       <Sheet
         open={openCreateProductsDialog}
         onOpenChange={() => {
@@ -171,31 +175,34 @@ function AdminProducts() {
           setUploadedImageUrl("");
         }}
       >
-        <SheetContent side="right" className="overflow-auto">
-          <SheetHeader>
-            <SheetTitle>
+        {/* Ensure the modal (and dropdown within it) is on top */}
+        <SheetContent side="right" className="overflow-auto max-w-lg p-6 bg-white z-50">
+          <SheetHeader className="mb-4 border-b pb-2">
+            <SheetTitle className="text-2xl font-semibold text-gray-800">
               {currentEditedId !== null ? "Edit Product" : "Add New Product"}
             </SheetTitle>
           </SheetHeader>
 
-          {/* Product Image Upload */}
-          <ProductImageUpload
-            imageFile={imageFile}
-            setImageFile={setImageFile}
-            uploadedImageUrl={uploadedImageUrl}
-            setUploadedImageUrl={setUploadedImageUrl}
-            setImageLoadingState={setImageLoadingState}
-            imageLoadingState={imageLoadingState}
-            isEditMode={currentEditedId !== null}
-          />
+          {/* Product Image Upload Section */}
+          <div className="mb-6">
+            <ProductImageUpload
+              imageFile={imageFile}
+              setImageFile={setImageFile}
+              uploadedImageUrl={uploadedImageUrl}
+              setUploadedImageUrl={setUploadedImageUrl}
+              setImageLoadingState={setImageLoadingState}
+              imageLoadingState={imageLoadingState}
+              isEditMode={currentEditedId !== null}
+            />
+          </div>
 
-          {/* Form for adding/editing product details */}
-          <div className="py-6">
+          {/* Product Details Form */}
+          <div>
             <CommonForm
               onSubmit={onSubmit}
               formData={formData}
               setFormData={setFormData}
-              buttonText={currentEditedId !== null ? "Edit" : "Add"}
+              buttonText={currentEditedId !== null ? "Update Product" : "Add Product"}
               formControls={addProductFormElements}
               isBtnDisabled={!isFormValid()}
             />

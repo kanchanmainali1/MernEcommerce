@@ -16,22 +16,34 @@ function AddressCard({
           ? () => setCurrentSelectedAddress(addressInfo)
           : null
       }
-      className={`cursor-pointer border-red-700 ${
-        selectedId?._id === addressInfo?._id
-          ? "border-red-900 border-[4px]"
-          : "border-black"
+      className={`cursor-pointer transition-shadow hover:shadow-xl border-2 ${
+        selectedId?._id === addressInfo?._id ? "border-blue-500" : "border-gray-200"
       }`}
     >
-      <CardContent className="grid p-4 gap-4">
-        <Label>Address: {addressInfo?.address}</Label>
-        <Label>City: {addressInfo?.city}</Label>
-        <Label>pincode: {addressInfo?.pincode}</Label>
-        <Label>Phone: {addressInfo?.phone}</Label>
-        <Label>Notes: {addressInfo?.notes}</Label>
+      <CardContent className="p-4">
+        <div className="space-y-1">
+          <Label className="block text-gray-800 font-medium">
+            Address: {addressInfo?.address}
+          </Label>
+          <Label className="block text-gray-700">City: {addressInfo?.city}</Label>
+          <Label className="block text-gray-700">Pincode: {addressInfo?.pincode}</Label>
+          <Label className="block text-gray-700">Phone: {addressInfo?.phone}</Label>
+          <Label className="block text-gray-700">Notes: {addressInfo?.notes}</Label>
+        </div>
       </CardContent>
-      <CardFooter className="p-3 flex justify-between">
-        <Button onClick={() => handleEditAddress(addressInfo)}>Edit</Button>
-        <Button onClick={() => handleDeleteAddress(addressInfo)}>Delete</Button>
+      <CardFooter className="p-4 flex justify-between border-t border-gray-200">
+        <Button
+          onClick={() => handleEditAddress(addressInfo)}
+          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded transition-colors"
+        >
+          Edit
+        </Button>
+        <Button
+          onClick={() => handleDeleteAddress(addressInfo)}
+          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors"
+        >
+          Delete
+        </Button>
       </CardFooter>
     </Card>
   );
