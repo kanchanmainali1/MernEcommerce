@@ -3,13 +3,13 @@ import { DialogContent } from "../ui/dialog";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
 import {
   getAllOrdersForAdmin,
   getOrderDetailsForAdmin,
   updateOrderStatus,
 } from "@/store/admin/order-slice";
-import { toast } from "sonner";
 import CommonForm from "../common/CommonForm";
 
 const initialFormData = {
@@ -18,12 +18,15 @@ const initialFormData = {
 
 function AdminOrderDetailsView({ orderDetails }) {
   const [formData, setFormData] = useState(initialFormData);
-  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   function handleUpdateStatus(e) {
     e.preventDefault();
     const { status } = formData;
+    if (!status.trim()) {
+      toast.error("Please select a status.");
+      return;
+    }
 
     toast.promise(
       dispatch(updateOrderStatus({ id: orderDetails?._id, orderStatus: status })),
@@ -38,97 +41,105 @@ function AdminOrderDetailsView({ orderDetails }) {
           }
           return "Failed to update order status.";
         },
-        error:
-          "Error updating order status. Please try again.",
+        error: "Error updating order status. Please try again.",
       }
     );
   }
 
+  if (!orderDetails) return null;
+
   return (
-    <DialogContent className="max-w-2xl p-6">
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="font-semibold text-gray-700">Order ID</p>
-            <Label className="bg-gray-200 p-2 rounded">
-              {orderDetails?._id}
-            </Label>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700">Order Date</p>
-            <Label className="bg-gray-200 p-2 rounded">
-              {orderDetails?.orderDate.split("T")[0]}
-            </Label>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700">Total Amount</p>
-            <Label className="bg-gray-200 p-2 rounded">
-              Rs.{orderDetails?.totalAmount}
-            </Label>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700">Payment Method</p>
-            <Label className="bg-gray-200 p-2 rounded">
-              {orderDetails?.paymentMethod}
-            </Label>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700">Payment Status</p>
-            <Label className="bg-gray-200 p-2 rounded">
-              {orderDetails?.paymentStatus}
-            </Label>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700">Order Status</p>
-            <Label className="bg-gray-200 p-2 rounded">
-              <Badge
-                className={`py-1 px-3 ${
-                  orderDetails?.orderStatus === "confirmed"
-                    ? "bg-green-500"
-                    : orderDetails?.orderStatus === "rejected"
-                    ? "bg-red-600"
-                    : "bg-yellow-500"
-                } text-white rounded`}
-              >
-                {orderDetails?.orderStatus}
-              </Badge>
-            </Label>
-          </div>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-4">
-          <div>
-            <p className="font-semibold text-gray-700">Order Details</p>
-            <ul className="divide-y divide-gray-300">
-              {orderDetails?.cartItems && orderDetails?.cartItems.length > 0 ? (
-                orderDetails.cartItems.map((item, idx) => (
-                  <li key={idx} className="py-2 flex justify-between">
-                    <span>{item.title}</span>
-                    <span>Qty: {item.quantity}</span>
-                    <span>Rs.{item.price}</span>
-                  </li>
-                ))
-              ) : (
-                <li className="py-2">No items found.</li>
-              )}
-            </ul>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700">Shipping Info</p>
-            <div className="space-y-1 text-sm text-gray-600">
-              <p>{user?.userName}</p>
-              <p>{orderDetails?.addressInfo?.address}</p>
-              <p>{orderDetails?.addressInfo?.city}</p>
-              <p>{orderDetails?.addressInfo?.pincode}</p>
-              <p>{orderDetails?.addressInfo?.phone}</p>
-              <p>{orderDetails?.addressInfo?.notes}</p>
+    <DialogContent className="max-w-sm w-full bg-white rounded-lg shadow-lg mt-10 p-4">
+      <div className="space-y-3">
+        {/* Section: Order Info */}
+        <div>
+          <h2 className="text-sm font-bold text-gray-800 mb-2">Order Information</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <p className="text-xs font-medium text-gray-600">Order ID</p>
+              <Label className="bg-gray-50 px-2 py-1 rounded border border-gray-200 shadow-sm text-xs text-gray-800 block">
+                {orderDetails?._id}
+              </Label>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-600">Order Date</p>
+              <Label className="bg-gray-50 px-2 py-1 rounded border border-gray-200 shadow-sm text-xs text-gray-800 block">
+                {orderDetails?.orderDate.split("T")[0]}
+              </Label>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-600">Total Amount</p>
+              <Label className="bg-gray-50 px-2 py-1 rounded border border-gray-200 shadow-sm text-xs text-gray-800 block">
+                Rs. {orderDetails?.totalAmount}
+              </Label>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-600">Payment Method</p>
+              <Label className="bg-gray-50 px-2 py-1 rounded border border-gray-200 shadow-sm text-xs text-gray-800 block">
+                {orderDetails?.paymentMethod}
+              </Label>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-600">Payment Status</p>
+              <Label className="bg-gray-50 px-2 py-1 rounded border border-gray-200 shadow-sm text-xs text-gray-800 block">
+                {orderDetails?.paymentStatus}
+              </Label>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-gray-600">Order Status</p>
+              <Label className="bg-gray-50 px-2 py-1 rounded border border-gray-200 shadow-sm inline-flex items-center">
+                <Badge
+                  className={`py-1 px-2 rounded text-xs font-semibold text-white ${
+                    orderDetails?.orderStatus === "confirmed"
+                      ? "bg-green-500"
+                      : orderDetails?.orderStatus === "rejected"
+                      ? "bg-red-600"
+                      : "bg-yellow-500"
+                  }`}
+                >
+                  {orderDetails?.orderStatus}
+                </Badge>
+              </Label>
             </div>
           </div>
         </div>
 
-        <div className="mt-4">
+        <Separator className="my-2" />
+
+        {/* Section: Order Details & Shipping Info */}
+        <div>
+          <h3 className="text-xs font-bold text-gray-800 mb-2">Order Details</h3>
+          <ul className="divide-y divide-gray-200 text-xs text-gray-700">
+            {orderDetails?.cartItems && orderDetails?.cartItems.length > 0 ? (
+              orderDetails.cartItems.map((item, idx) => (
+                <li key={idx} className="py-1 flex justify-between items-center">
+                  <span className="font-medium">{item.title}</span>
+                  <span>Qty: {item.quantity}</span>
+                  <span>Rs. {item.price}</span>
+                </li>
+              ))
+            ) : (
+              <li className="py-1 text-gray-500">No items found.</li>
+            )}
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="text-xs font-bold text-gray-800 mb-2">Shipping Info</h3>
+          <div className="space-y-1 text-xs text-gray-600">
+            <p>{orderDetails?.addressInfo?.address}</p>
+            <p>{orderDetails?.addressInfo?.city}</p>
+            <p>{orderDetails?.addressInfo?.pincode}</p>
+            <p>{orderDetails?.addressInfo?.phone}</p>
+            <p>{orderDetails?.addressInfo?.notes}</p>
+          </div>
+        </div>
+
+        <Separator className="my-2" />
+
+        {/* Section: Update Order Status */}
+        <div>
+          <h3 className="text-xs font-bold text-gray-800 mb-2">Update Order Status</h3>
           <CommonForm
             formControls={[
               {

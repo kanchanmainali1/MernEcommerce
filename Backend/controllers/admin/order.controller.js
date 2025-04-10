@@ -1,17 +1,15 @@
+// controllers/admin/order-controller.js
 const Order = require("../../models/Order");
 
+// Fetch all orders (for admin)
 const getAllOrdersOfAllUsers = async (req, res) => {
   try {
     const orders = await Order.find({});
-    if (!orders.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No orders found!",
-      });
-    }
+    // Always return a 200 response, even if orders is an empty array
     res.status(200).json({
       success: true,
-      data: orders,
+      data: orders, // This might be an empty array
+      message: orders.length ? undefined : "No orders found!",
     });
   } catch (e) {
     console.error("Error fetching orders:", e.message);

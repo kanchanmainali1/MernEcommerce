@@ -1,10 +1,7 @@
 import {
   House,
-  LogOut,
   Menu,
   ShoppingCart,
-  User,
-  UserRound,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
@@ -20,9 +17,6 @@ import { userViewHeaderMenuItems } from "@/config";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -36,33 +30,29 @@ function MenuItems() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  function handleNavigate(getCurrentMenuItem) {
+  function handleNavigate(menuItem) {
     sessionStorage.removeItem("filters");
     const currentFilter =
-      getCurrentMenuItem.id !== "home" &&
-      getCurrentMenuItem.id !== "products" &&
-      getCurrentMenuItem.id !== "search"
-        ? {
-            category: [getCurrentMenuItem.id],
-          }
+      menuItem.id !== "home" &&
+      menuItem.id !== "products" &&
+      menuItem.id !== "search"
+        ? { category: [menuItem.id] }
         : null;
 
     sessionStorage.setItem("filters", JSON.stringify(currentFilter));
 
     location.pathname.includes("listing") && currentFilter !== null
-      ? setSearchParams(
-          new URLSearchParams(`?category=${getCurrentMenuItem.id}`)
-        )
-      : navigate(getCurrentMenuItem.path);
+      ? setSearchParams(new URLSearchParams(`?category=${menuItem.id}`))
+      : navigate(menuItem.path);
   }
 
   return (
-    <nav className="flex flex-col mb-3 lg:mb-0 lg:items-center gap-6 lg:flex-row">
+    <nav className="flex flex-col lg:flex-row lg:items-center lg:space-x-8 gap-4">
       {userViewHeaderMenuItems.map((menuItem) => (
         <Label
           onClick={() => handleNavigate(menuItem)}
-          className="text-sm font-medium cursor-pointer text-gray-700 hover:text-blue-600 transition-all"
           key={menuItem.id}
+          className="cursor-pointer text-base font-semibold text-gray-800 hover:text-indigo-600 transition duration-300"
         >
           {menuItem.label}
         </Label>
@@ -83,51 +73,70 @@ function HeaderRightContent() {
   };
 
   useEffect(() => {
-    dispatch(fetchCartItems(user?.id));
-  }, [dispatch]);
+    if (user?.id) {
+      dispatch(fetchCartItems(user.id));
+    }
+  }, [dispatch, user?.id]);
 
   return (
-    <div className="flex lg:items-center lg:flex-row flex-col gap-4">
-      <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
+    <div className="flex flex-col lg:flex-row items-center gap-4">
+      <Sheet open={openCartSheet} onOpenChange={setOpenCartSheet}>
         <Button
           onClick={() => setOpenCartSheet(true)}
           variant="ghost"
           size="icon"
-          className="relative shadow-sm hover:shadow-md"
+          className="relative rounded-full hover:bg-gray-100 transition shadow-sm"
         >
-          <ShoppingCart className="w-6 h-6" />
+          <ShoppingCart className="w-6 h-6 text-gray-700" />
           {cartItems?.items?.length > 0 && (
-            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">{cartItems.items.length}</div>
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center">
+              {cartItems.items.length}
+            </div>
           )}
         </Button>
-        <UserCartWrapper
-          setOpenCartSheet={setOpenCartSheet}
-          cartItems={cartItems?.items || []}
-        />
+        <UserCartWrapper setOpenCartSheet={setOpenCartSheet} cartItems={cartItems?.items || []} />
       </Sheet>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Avatar className="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-sm cursor-pointer">
-            <AvatarFallback className="bg-blue-600 text-white font-bold">
-              {user?.userName[0].toUpperCase()}
+          <Avatar className="cursor-pointer bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg">
+            <AvatarFallback className="bg-purple-600 text-white font-bold">
+              {user?.userName ? user.userName[0].toUpperCase() : "U"}
             </AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
-        <DropdownMenuContent side="right" align="end" className="w-64 bg-white shadow-xl rounded-lg p-6">
+        <DropdownMenuContent
+          side="right"
+          align="end"
+          className="w-64 p-6 bg-white shadow-xl rounded-lg border border-gray-200"
+        >
           <div className="flex flex-col items-center space-y-4">
-            <Avatar className="bg-gradient-to-r from-pink-500 to-purple-500 h-14 w-14 shadow-lg">
+            <Avatar className="h-14 w-14 bg-gradient-to-r from-purple-700 to-indigo-700 shadow-xl">
               <AvatarFallback className="text-white font-bold text-xl">
-                {user?.userName[0].toUpperCase()}
+                {user?.userName ? user.userName[0].toUpperCase() : "U"}
               </AvatarFallback>
             </Avatar>
             <div className="text-center">
-              <p className="text-xl font-bold text-gray-800">{user?.userName}</p>
+              <p className="text-xl font-bold text-gray-800">
+                {user?.userName || "User"}
+              </p>
               <p className="text-sm text-gray-500">{user?.email}</p>
             </div>
             <div className="w-full flex flex-col space-y-2">
-              <Button variant="outline" className="w-full py-2" onClick={() => navigate('/user/account')}>Account</Button>
-              <Button variant="destructive" className="w-full py-2" onClick={handleLogout}>Logout</Button>
+              <Button
+                variant="outline"
+                className="w-full py-2"
+                onClick={() => navigate("/user/account")}
+              >
+                Account
+              </Button>
+              <Button
+                variant="destructive"
+                className="w-full py-2"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
             </div>
           </div>
         </DropdownMenuContent>
@@ -135,29 +144,36 @@ function HeaderRightContent() {
     </div>
   );
 }
+
 function UserHeader() {
   return (
-    <header className="sticky top-0 z-40 bg-white shadow-md border-b">
-      <div className="flex items-center justify-between px-4 h-16 md:px-6">
-        <Link className="flex items-center gap-2 text-blue-600" to="/user/home">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-md border-b border-gray-200">
+      <div className="flex items-center justify-between px-8 py-4 md:px-12">
+        <Link
+          to="/user/home"
+          className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 transition"
+        >
           <House className="h-6 w-6" />
-          <span className="font-bold text-2xl tracking-tight">Buyfinity</span>
+          <span className="font-extrabold text-2xl tracking-tight">Buyfinity</span>
         </Link>
-        <div className="hidden lg:block">
+        <div className="hidden lg:flex lg:items-center lg:space-x-8">
           <MenuItems />
         </div>
         <div className="hidden lg:block">
           <HeaderRightContent />
         </div>
+        {/* Mobile Menu */}
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="lg:hidden">
-              <Menu className="h-6 w-6" />
+              <Menu className="h-6 w-6 text-gray-700" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-full max-w-xs bg-white">
+          <SheetContent side="left" className="w-full max-w-xs bg-white p-6">
             <MenuItems />
-            <HeaderRightContent />
+            <div className="mt-6">
+              <HeaderRightContent />
+            </div>
           </SheetContent>
         </Sheet>
       </div>

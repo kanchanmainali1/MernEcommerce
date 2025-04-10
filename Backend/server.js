@@ -9,6 +9,7 @@ const userAddressRoutes=require('./routes/users/address.route');
 const userOrderRoutes=require('./routes/users/order.route');
 const usersearchRoutes=require('./routes/users/search.route');
 const commonFeatureRoutes=require('./routes/common/feature.route');
+const adminOrderRoutes=require('./routes/admin/order.route');
 const cors=require('cors');
 mongoose.connect(
 'mongodb+srv://mainalikanchan08:mainalikanchan2060@cluster0.o7whh.mongodb.net/'
@@ -34,6 +35,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use('/api/auth',authRoutes)
 app.use('/api/admin/products',adminProductRoutes) 
+app.use("/api/admin/orders", adminOrderRoutes);
 app.use('/api/user/products',userProductRoutes)
 app.use('/api/user/cart',userCartRoutes)
 app.use( '/api/user/address',userAddressRoutes)

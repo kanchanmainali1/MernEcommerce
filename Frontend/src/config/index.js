@@ -102,7 +102,7 @@ export const userViewHeaderMenuItems = [
   },
   {
     id: "products",
-    label: "Products",
+    label: " All Products",
     path: "/user/listing",
   },
   {

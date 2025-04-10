@@ -1,3 +1,4 @@
+// src/store/admin/order-slice.js
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -10,58 +11,64 @@ const initialState = {
 
 export const getAllOrdersForAdmin = createAsyncThunk(
   "adminOrder/getAllOrdersForAdmin",
-  async () => {
-    const response = await axios.get(`http://localhost:5000/api/admin/orders/get`);
-    return response.data; // Ensure this matches your backend response structure
+  async (_, thunkAPI) => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/admin/orders/get");
+      return response.data; // Expecting { success: true, data: orders }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
   }
 );
 
 export const getOrderDetailsForAdmin = createAsyncThunk(
   "adminOrder/getOrderDetailsForAdmin",
-  async (id) => {
-    const response = await axios.get(`http://localhost:5000/api/admin/orders/details/${id}`);
-    return response.data; // Ensure this matches your backend response structure
+  async (id, thunkAPI) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/admin/orders/details/${id}`);
+      return response.data; // Expecting { success: true, data: order }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
   }
 );
 
 export const updateOrderStatus = createAsyncThunk(
   "adminOrder/updateOrderStatus",
-  async ({ id, orderStatus }) => {
-    const response = await axios.put(
-      `http://localhost:5000/api/admin/orders/update/${id}`,
-      { orderStatus }
-    );
-    return response.data; // Ensure this matches your backend response structure
+  async ({ id, orderStatus }, thunkAPI) => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/admin/orders/update/${id}`, { orderStatus });
+      return response.data; // Expecting { success: true, message: ..., data: updatedOrder }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
   }
 );
 
 const adminOrderSlice = createSlice({
-  name: "adminOrder", // Make sure this matches what you use in the store
+  name: "adminOrder",
   initialState,
   reducers: {
     resetOrderDetails: (state) => {
-      console.log("resetOrderDetails");
       state.orderDetails = null;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // Fetch All Orders
       .addCase(getAllOrdersForAdmin.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(getAllOrdersForAdmin.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.orderList = action.payload.data || []; // Ensure it’s an array
+        state.orderList = action.payload.data || [];
       })
       .addCase(getAllOrdersForAdmin.rejected, (state, action) => {
         state.isLoading = false;
         state.orderList = [];
-        state.error = action.error.message;
+        state.error = action.payload ? action.payload.message : action.error.message;
       })
-
-      // Fetch Order Details
       .addCase(getOrderDetailsForAdmin.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -73,10 +80,8 @@ const adminOrderSlice = createSlice({
       .addCase(getOrderDetailsForAdmin.rejected, (state, action) => {
         state.isLoading = false;
         state.orderDetails = null;
-        state.error = action.error.message;
+        state.error = action.payload ? action.payload.message : action.error.message;
       })
-
-      // Update Order Status
       .addCase(updateOrderStatus.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -86,7 +91,7 @@ const adminOrderSlice = createSlice({
       })
       .addCase(updateOrderStatus.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message;
+        state.error = action.payload ? action.payload.message : action.error.message;
       });
   },
 });

@@ -1,49 +1,50 @@
+import React, { useState, useEffect } from "react";
 import { StarIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { Separator } from "../ui/separator";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { Label } from "../ui/label";
-import { useEffect, useState } from "react";
 import { setProductDetails } from "@/store/user/product-slice";
 import { addToCart, fetchCartItems } from "@/store/user/cart-slice";
+// import { addReview, getReviews } from "@/store/user/review-slice"; // Review actions (if needed)
 
 function ProductDetailsDialog({ open, setOpen, productDetails }) {
+  // Local state for review message and rating
   const [reviewMsg, setReviewMsg] = useState("");
   const [rating, setRating] = useState(0);
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  // const { cartItems } = useSelector((state) => state.userCart);
   // const { reviews } = useSelector((state) => state.userReview);
 
-  function handleRatingChange(getRating) {
-    setRating(getRating);
+  // Handle rating change
+  function handleRatingChange(newRating) {
+    setRating(newRating);
   }
 
-  function handleAddToCart(getCurrentProductId, getTotalStock) {
-    let getCartItems = fetchCartItems.items || [];
-
-    if (getCartItems.length) {
-      const indexOfCurrentItem = getCartItems.findIndex(
-        (item) => item.productId === getCurrentProductId
+  // Add product to cart
+  function handleAddToCart(productId, totalStock) {
+    let currentCartItems = fetchCartItems.items || [];
+    if (currentCartItems.length) {
+      const index = currentCartItems.findIndex(
+        (item) => item.productId === productId
       );
-      if (indexOfCurrentItem > -1) {
-        const getQuantity = getCartItems[indexOfCurrentItem].quantity;
-        if (getQuantity + 1 > getTotalStock) {
-          toast.error(`Only ${getQuantity} quantity can be added for this item`);
+      if (index > -1) {
+        const currentQuantity = currentCartItems[index].quantity;
+        if (currentQuantity + 1 > totalStock) {
+          toast.error(`Only ${currentQuantity} quantity can be added for this item`);
           return;
         }
       }
     }
-
     toast.promise(
       dispatch(
         addToCart({
           userId: user?.id,
-          productId: getCurrentProductId,
+          productId,
           quantity: 1,
         })
       ).unwrap(),
@@ -61,6 +62,47 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
     );
   }
 
+  // Uncomment and adjust if you enable review functionality
+  /*
+  function handleAddReview() {
+    if (!rating || reviewMsg.trim() === "") {
+      toast.error("Please provide both a rating and a review message.");
+      return;
+    }
+    toast.promise(
+      dispatch(
+        addReview({
+          productId: productDetails?._id,
+          userId: user?.id,
+          userName: user?.userName,
+          reviewMessage: reviewMsg,
+          reviewValue: rating,
+        })
+      ).unwrap(),
+      {
+        loading: "Submitting your review...",
+        success: (data) => {
+          if (data?.success) {
+            setRating(0);
+            setReviewMsg("");
+            dispatch(getReviews(productDetails?._id));
+            return "Review added successfully!";
+          }
+          return "Review submission failed";
+        },
+        error: "Failed to submit review. Please try again.",
+      }
+    );
+  }
+
+  useEffect(() => {
+    if (productDetails) {
+      dispatch(getReviews(productDetails?._id));
+    }
+  }, [dispatch, productDetails]);
+  */
+
+  // Handle dialog close: resets the product details and local state
   function handleDialogClose() {
     setOpen(false);
     dispatch(setProductDetails());
@@ -68,46 +110,10 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
     setReviewMsg("");
   }
 
-  // function handleAddReview() {
-  //   toast.promise(
-  //     dispatch(
-  //       addReview({
-  //         productId: productDetails?._id,
-  //         userId: user?.id,
-  //         userName: user?.userName,
-  //         reviewMessage: reviewMsg,
-  //         reviewValue: rating,
-  //       })
-  //     ).unwrap(),
-  //     {
-  //       loading: "Submitting your review...",
-  //       success: (data) => {
-  //         if (data?.success) {
-  //           setRating(0);
-  //           setReviewMsg("");
-  //           dispatch(getReviews(productDetails?._id));
-  //           return "Review added successfully!";
-  //         }
-  //         return "Review submission failed";
-  //       },
-  //       error: "Failed to submit review. Please try again.",
-  //     }
-  //   );
-  // }
-
-  // useEffect(() => {
-  //   if (productDetails !== null) dispatch(getReviews(productDetails?._id));
-  // }, [productDetails]);
-
-  // const averageReview =
-  //   reviews && reviews.length > 0
-  //     ? reviews.reduce((sum, reviewItem) => sum + reviewItem.reviewValue, 0) /
-  //       reviews.length
-  //     : 0;
-
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 max-w-[90vw] sm:max-w-[80vw] lg:max-w-[70vw] bg-white rounded-xl shadow-2xl">
+      <DialogContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 max-w-[80vw] sm:max-w-[70vw] lg:max-w-[60vw] bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl">
+        {/* Left Column - Product Image */}
         <div className="relative overflow-hidden rounded-lg">
           <img
             src={productDetails?.image}
@@ -117,16 +123,25 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
             className="w-full h-auto object-cover rounded-lg"
           />
         </div>
+        {/* Right Column - Product Details */}
         <div className="flex flex-col justify-between">
+          {/* Product Info */}
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-800">{productDetails?.title}</h1>
-            <p className="text-gray-600 text-lg mt-4">
+            <h1 className="text-3xl font-extrabold text-gray-900">
+              {productDetails?.title}
+            </h1>
+            <p className="text-gray-700 text-base mt-4">
               {productDetails?.description}
             </p>
           </div>
+          {/* Pricing and Add to Cart */}
           <div className="mt-6">
             <div className="flex items-center justify-between">
-              <p className={`text-3xl font-bold text-primary ${productDetails?.salePrice > 0 ? "line-through text-gray-500" : ""}`}>
+              <p
+                className={`text-3xl font-bold ${
+                  productDetails?.salePrice > 0 ? "line-through text-gray-500" : "text-primary"
+                }`}
+              >
                 Rs.{productDetails?.price}
               </p>
               {productDetails?.salePrice > 0 && (
@@ -135,18 +150,6 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                 </p>
               )}
             </div>
-            {/* <div className="flex items-center gap-2 mt-2">
-              <div className="flex items-center gap-0.5">
-                <StarIcon className="w-5 h-5 text-yellow-500" />
-                <StarIcon className="w-5 h-5 text-yellow-500" />
-                <StarIcon className="w-5 h-5 text-yellow-500" />
-                <StarIcon className="w-5 h-5 text-yellow-500" />
-                <StarIcon className="w-5 h-5 text-yellow-500" />
-              </div>
-              <span className="text-muted-foreground">
-                ({averageReview.toFixed(2)})
-              </span>
-            </div> */}
             <div className="mt-6">
               {productDetails?.totalStock === 0 ? (
                 <Button className="w-full opacity-60 cursor-not-allowed" disabled>
@@ -165,60 +168,76 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
             </div>
           </div>
           <Separator className="my-6" />
-          <div className="max-h-48 overflow-auto">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Reviews</h2>
-            {/* <div className="grid gap-6">
+          {/*
+            REVIEW SECTION (Currently Commented Out)
+          
+            Uncomment to enable review functionality.
+          <div className="max-h-64 overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Reviews</h2>
+            <div className="space-y-6">
               {reviews && reviews.length > 0 ? (
                 reviews.map((reviewItem, idx) => (
                   <div key={idx} className="flex gap-4">
-                    <Avatar className="w-10 h-10 border">
+                    <Avatar className="w-10 h-10">
                       <AvatarFallback>
-                        {reviewItem?.userName[0].toUpperCase()}
+                        {reviewItem?.userName ? reviewItem.userName.charAt(0).toUpperCase() : "U"}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="grid gap-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold">{reviewItem?.userName}</h3>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-gray-900">{reviewItem?.userName}</h3>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <StarIcon
+                              key={i}
+                              className={`w-4 h-4 ${
+                                i < reviewItem.reviewValue ? "text-yellow-500" : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-0.5">
-                        <StarIcon className="w-4 h-4 text-yellow-500" />
-                        <StarIcon className="w-4 h-4 text-yellow-500" />
-                        <StarIcon className="w-4 h-4 text-yellow-500" />
-                        <StarIcon className="w-4 h-4 text-yellow-500" />
-                        <StarIcon className="w-4 h-4 text-yellow-500" />
-                      </div>
-                      <p className="text-gray-600">{reviewItem.reviewMessage}</p>
+                      <p className="text-gray-700">{reviewItem.reviewMessage}</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <h1 className="text-gray-500">No Reviews</h1>
+                <p className="text-gray-500">No reviews yet.</p>
               )}
-            </div> */}
-
-            {/* Add Review Section */}
-            {/* <div className="mt-10 flex-col flex gap-2">
-              <Label>Write a review</Label>
-              <div className="flex gap-1">
-                <StarRatingComponent
-                  rating={rating}
-                  handleRatingChange={handleRatingChange}
-                />
-              </div>
-              <Input
-                name="reviewMsg"
-                value={reviewMsg}
-                onChange={(event) => setReviewMsg(event.target.value)}
-                placeholder="Write a review..."
-              />
-              <Button
-                onClick={handleAddReview}
-                disabled={reviewMsg.trim() === ""}
-              >
-                Submit
-              </Button>
-            </div> */}
+            </div>
           </div>
+          <div className="mt-8 space-y-4">
+            <Label className="text-lg font-semibold text-gray-800">Write a review</Label>
+            <div className="flex items-center gap-2">
+              {[...Array(5)].map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleRatingChange(i + 1)}
+                  className="focus:outline-none"
+                >
+                  <StarIcon
+                    className={`w-6 h-6 ${i < rating ? "text-yellow-500" : "text-gray-300"}`}
+                  />
+                </button>
+              ))}
+            </div>
+            <Input
+              name="reviewMsg"
+              value={reviewMsg}
+              onChange={(e) => setReviewMsg(e.target.value)}
+              placeholder="Write your review..."
+              className="border border-gray-300 rounded-md px-4 py-2 mt-2"
+            />
+            <Button
+              onClick={handleAddReview}
+              disabled={reviewMsg.trim() === ""}
+              className="bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
+            >
+              Submit Review
+            </Button>
+          </div>
+          */}
         </div>
       </DialogContent>
     </Dialog>

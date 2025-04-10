@@ -45,7 +45,7 @@ function UserHome() {
     }
   }, [dispatch, keyword]);
 
-  // Banner slider auto-rotation.
+  // Auto-rotate banner slider.
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % banners.length);
@@ -53,7 +53,7 @@ function UserHome() {
     return () => clearInterval(timer);
   }, []);
 
-  // Search effect: Debounce input and update search results.
+  // Debounce search input.
   useEffect(() => {
     const timer = setTimeout(() => {
       if (keyword && keyword.trim().length > 3) {
@@ -67,18 +67,17 @@ function UserHome() {
     return () => clearTimeout(timer);
   }, [keyword, dispatch, setSearchParams]);
 
-  // Open product details dialog when available.
+  // Open product details dialog when fetched.
   useEffect(() => {
     if (productDetails !== null) setOpenDetailsDialog(true);
   }, [productDetails]);
 
-  // Navigate to the full listing page.
-  function handleNavigateToListingPage() {
+  // Navigation and data fetching.
+  const handleNavigateToListingPage = () => {
     navigate(`/user/listing`);
-  }
+  };
 
-  // Fetch product details.
-  function handleGetProductDetails(productId) {
+  const handleGetProductDetails = (productId) => {
     toast.promise(dispatch(fetchProductDetails(productId)).unwrap(), {
       loading: "Loading product...",
       success: () => {
@@ -87,18 +86,14 @@ function UserHome() {
       },
       error: "Failed to load product details.",
     });
-  }
+  };
 
-  // Handler for adding product to cart.
-  function handleAddToCart(productId, totalStock) {
+  const handleAddToCart = (productId, totalStock) => {
     const currentCartItems = cartItems?.items || [];
     const index = currentCartItems.findIndex((item) => item.productId === productId);
-    if (index > -1) {
-      const quantity = currentCartItems[index].quantity;
-      if (quantity + 1 > totalStock) {
-        toast.error(`Only ${totalStock} quantity can be added for this item`);
-        return;
-      }
+    if (index > -1 && currentCartItems[index].quantity + 1 > totalStock) {
+      toast.error(`Only ${totalStock} quantity can be added for this item`);
+      return;
     }
     toast.promise(
       dispatch(
@@ -108,40 +103,44 @@ function UserHome() {
           quantity: 1,
         })
       ).then((data) => {
-        if (data?.payload?.success) {
-          dispatch(fetchCartItems(user?.id));
-        }
+        if (data?.payload?.success) dispatch(fetchCartItems(user?.id));
       }),
       {
         loading: "Adding product to cart...",
-        success: "Product is added to cart!",
+        success: "Product added to cart!",
         error: "Failed to add product to cart. Please try again.",
       }
     );
-  }
+  };
+
+  // Slider controls.
+  const handlePrevSlide = () =>
+    setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
+  const handleNextSlide = () =>
+    setCurrentSlide((prev) => (prev + 1) % banners.length);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* Top Search Bar */}
-      <div className="w-full bg-white shadow-md py-4">
+      {/* Search Bar Section (Moved Above Banner Slider) */}
+      <div className="w-full bg-white/90 backdrop-blur-md py-6 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="relative max-w-lg mx-auto">
+          <div className="relative max-w-4xl mx-auto">
             <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-              <Search className="w-5 h-5 text-gray-400" />
+              <Search className="w-6 h-6 text-gray-500" />
             </div>
             <Input
               value={keyword}
               name="keyword"
               onChange={(e) => setKeyword(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-300 shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
               placeholder="Search Products..."
+              className="w-full pl-12 pr-4 py-3 text-base rounded-full border border-gray-300 shadow focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 transition-all"
             />
           </div>
         </div>
       </div>
 
-      {/* Banner Slider */}
-      <div className="relative w-full h-[450px] md:h-[550px] overflow-hidden rounded-xl shadow-xl my-8">
+      {/* Banner Slider Section */}
+      <div className="relative w-full h-[550px] md:h-[650px] overflow-hidden">
         {banners.map((banner, index) => (
           <img
             key={index}
@@ -152,31 +151,26 @@ function UserHome() {
             }`}
           />
         ))}
-        {/* Banner Overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white bg-black/60 rounded-xl">
-          <h1 className="text-5xl font-bold tracking-tight drop-shadow-lg mb-4">
-            Explore The Best Collections
-          </h1>
-          <p className="text-lg drop-shadow-lg mb-6">
-            Discover exclusive products at unbeatable prices. Shop your favorite styles with ease and elegance.
-          </p>
-          <div className="flex gap-4">
-            <Button
-              variant="default"
-              className="text-white px-6 py-3 rounded-xl hover:bg-gray-900 transition-all"
-              onClick={handleNavigateToListingPage}
-            >
-              Browse Collection
-            </Button>
-          </div>
-        </div>
+        {/* Slider Arrow Controls */}
+        <button
+          onClick={handlePrevSlide}
+          className="absolute left-6 top-1/2 transform -translate-y-1/2 bg-black/50 text-white rounded-full p-2 hover:bg-black/70 transition"
+        >
+          <ChevronLeftIcon className="w-6 h-6" />
+        </button>
+        <button
+          onClick={handleNextSlide}
+          className="absolute right-6 top-1/2 transform -translate-y-1/2 bg-black/50 text-white rounded-full p-2 hover:bg-black/70 transition"
+        >
+          <ChevronRightIcon className="w-6 h-6" />
+        </button>
       </div>
 
       {/* Products Grid */}
       <div className="container mx-auto md:px-6 px-4 pb-12">
         {keyword && keyword.trim().length > 3 ? (
           searchResults.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {searchResults.map((item) => (
                 <UserProductTile
                   key={item.productId}
@@ -187,7 +181,7 @@ function UserHome() {
               ))}
             </div>
           ) : (
-            <h1 className="text-5xl font-extrabold text-center">No result found!</h1>
+            <h1 className="text-5xl font-extrabold text-center mt-16">No result found!</h1>
           )
         ) : (
           <>
