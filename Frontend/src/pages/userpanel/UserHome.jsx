@@ -185,7 +185,7 @@ function UserHome() {
           )
         ) : (
           <>
-            <h2 className="text-4xl font-bold text-center mb-10 text-gray-800">
+            <h2 className="text-4xl font-bold text-center mb-10 mt-6 text-gray-800">
               Featured Products
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">

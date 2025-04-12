@@ -108,10 +108,10 @@ function HeaderRightContent() {
         <DropdownMenuContent
           side="right"
           align="end"
-          className="w-64 p-6 bg-white shadow-xl rounded-lg border border-gray-200"
+          className="w-64 p-6 bg-white shadow-xl rounded-lg border border-gray-200 mt-3"
         >
           <div className="flex flex-col items-center space-y-4">
-            <Avatar className="h-14 w-14 bg-gradient-to-r from-purple-700 to-indigo-700 shadow-xl">
+            <Avatar className="h-14 w-14  bg-gradient-to-r from-purple-700 to-indigo-700 shadow-xl">
               <AvatarFallback className="text-white font-bold text-xl">
                 {user?.userName ? user.userName[0].toUpperCase() : "U"}
               </AvatarFallback>

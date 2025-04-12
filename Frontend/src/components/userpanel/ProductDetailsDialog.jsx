@@ -10,22 +10,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { setProductDetails } from "@/store/user/product-slice";
 import { addToCart, fetchCartItems } from "@/store/user/cart-slice";
-// import { addReview, getReviews } from "@/store/user/review-slice"; // Review actions (if needed)
+import { addReview, getReviews } from "@/store/user/review-slice";
 
 function ProductDetailsDialog({ open, setOpen, productDetails }) {
-  // Local state for review message and rating
   const [reviewMsg, setReviewMsg] = useState("");
   const [rating, setRating] = useState(0);
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  // const { reviews } = useSelector((state) => state.userReview);
+  const { reviews } = useSelector((state) => state.userReview); // ✅ FIXED
 
-  // Handle rating change
   function handleRatingChange(newRating) {
     setRating(newRating);
   }
 
-  // Add product to cart
   function handleAddToCart(productId, totalStock) {
     let currentCartItems = fetchCartItems.items || [];
     if (currentCartItems.length) {
@@ -40,6 +37,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
         }
       }
     }
+
     toast.promise(
       dispatch(
         addToCart({
@@ -62,13 +60,12 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
     );
   }
 
-  // Uncomment and adjust if you enable review functionality
-  /*
   function handleAddReview() {
     if (!rating || reviewMsg.trim() === "") {
       toast.error("Please provide both a rating and a review message.");
       return;
     }
+
     toast.promise(
       dispatch(
         addReview({
@@ -100,9 +97,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
       dispatch(getReviews(productDetails?._id));
     }
   }, [dispatch, productDetails]);
-  */
 
-  // Handle dialog close: resets the product details and local state
   function handleDialogClose() {
     setOpen(false);
     dispatch(setProductDetails());
@@ -113,7 +108,6 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 max-w-[80vw] sm:max-w-[70vw] lg:max-w-[60vw] bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-2xl">
-        {/* Left Column - Product Image */}
         <div className="relative overflow-hidden rounded-lg">
           <img
             src={productDetails?.image}
@@ -123,9 +117,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
             className="w-full h-auto object-cover rounded-lg"
           />
         </div>
-        {/* Right Column - Product Details */}
         <div className="flex flex-col justify-between">
-          {/* Product Info */}
           <div>
             <h1 className="text-3xl font-extrabold text-gray-900">
               {productDetails?.title}
@@ -134,12 +126,13 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
               {productDetails?.description}
             </p>
           </div>
-          {/* Pricing and Add to Cart */}
           <div className="mt-6">
             <div className="flex items-center justify-between">
               <p
                 className={`text-3xl font-bold ${
-                  productDetails?.salePrice > 0 ? "line-through text-gray-500" : "text-primary"
+                  productDetails?.salePrice > 0
+                    ? "line-through text-gray-500"
+                    : "text-primary"
                 }`}
               >
                 Rs.{productDetails?.price}
@@ -167,11 +160,10 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
               )}
             </div>
           </div>
+
           <Separator className="my-6" />
-          {/*
-            REVIEW SECTION (Currently Commented Out)
-          
-            Uncomment to enable review functionality.
+
+          {/* Reviews Section */}
           <div className="max-h-64 overflow-y-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Reviews</h2>
             <div className="space-y-6">
@@ -180,7 +172,9 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                   <div key={idx} className="flex gap-4">
                     <Avatar className="w-10 h-10">
                       <AvatarFallback>
-                        {reviewItem?.userName ? reviewItem.userName.charAt(0).toUpperCase() : "U"}
+                        {reviewItem?.userName
+                          ? reviewItem.userName.charAt(0).toUpperCase()
+                          : "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
@@ -206,6 +200,8 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
               )}
             </div>
           </div>
+
+          {/* Write a Review */}
           <div className="mt-8 space-y-4">
             <Label className="text-lg font-semibold text-gray-800">Write a review</Label>
             <div className="flex items-center gap-2">
@@ -237,7 +233,6 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
               Submit Review
             </Button>
           </div>
-          */}
         </div>
       </DialogContent>
     </Dialog>
